@@ -769,7 +769,7 @@
 						</form>
 					</section>
 					<footer class="modal-card-foot is-stretched">
-						<button class="button is-success" onclick="this.innerHTML = '<i class=\'fas fa-spinner fa-spin\'></i>&nbsp;{{ __('app.loading_please_wait') }}'; document.getElementById('frmEditInventoryItem').submit();">{{ __('app.save') }}</button>
+						<button class="button is-success" onclick="this.innerHTML = '<i class=\'fas fa-spinner fa-spin\'></i>&nbsp;{{ __('app.loading_please_wait') }}'; window.vue.submitForm(document.getElementById('frmEditInventoryItem'));">{{ __('app.save') }}</button>
 						<button class="button" onclick="window.vue.bShowEditInventoryItem = false;">{{ __('app.cancel') }}</button>
 					</footer>
 				</div>
@@ -1819,7 +1819,7 @@
 						</form>
 					</section>
 					<footer class="modal-card-foot is-stretched">
-						<button class="button is-success" onclick="this.innerHTML = '<i class=\'fas fa-spinner fa-spin\'></i>&nbsp;{{ __('app.loading_please_wait') }}'; document.getElementById('frmAddPlantAttachment').submit();">{{ __('app.add') }}</button>
+						<button class="button is-success" onclick="this.innerHTML = '<i class=\'fas fa-spinner fa-spin\'></i>&nbsp;{{ __('app.loading_please_wait') }}'; window.vue.submitForm(document.getElementById('frmAddPlantAttachment'));">{{ __('app.add') }}</button>
 						<button class="button" onclick="window.vue.bShowAddPlantAttachment = false;">{{ __('app.cancel') }}</button>
 					</footer>
 				</div>

@@ -19,6 +19,13 @@ class BaseController extends Asatru\Controller\Controller {
 	 */
 	public function __construct($layout = '')
 	{
+		//Uploads sent by JavaScript (see app/resources/js/upload.js) follow the redirect with this header.
+		//Answer without rendering, so that pending flash messages are kept for the page the browser opens next.
+		if ((($_SERVER['REQUEST_METHOD'] ?? '') === 'GET') && (isset($_SERVER['HTTP_X_HORTUSFOX_UPLOAD_REDIRECT']))) {
+			http_response_code(204);
+			exit();
+		}
+
 		if ($layout !== '') {
 			$this->layout = $layout;
 		}

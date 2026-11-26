@@ -17,6 +17,8 @@ import '@fortawesome/fontawesome-free/js/brands.js';
 import Chart from 'chart.js/auto';
 import 'chartjs-adapter-date-fns';
 
+import { shouldBufferUpload, encodeMultipartFormData, formNeedsBufferedUpload, submitFormBuffered } from './upload.js';
+
 window.constChatMessageQueryRefreshRate = 1000 * 15;
 window.constChatUserListRefreshRate = 1000 * 15;
 window.constChatTypingRefreshRate = 2000;
@@ -125,7 +127,22 @@ window.createVueInstance = function(element) {
                     func = window.axios.delete;
                 }
 
-                func(url, data, config)
+                let request = Promise.resolve(data);
+
+                if ((data instanceof FormData) && (shouldBufferUpload(data))) {
+                    request = encodeMultipartFormData(data).then(function(encoded) {
+                        config = Object.assign({}, config, {
+                            headers: Object.assign({}, config.headers, { 'Content-Type': encoded.contentType })
+                        });
+
+                        return encoded.body;
+                    });
+                }
+
+                request
+                    .then(function(body){
+                        return func(url, body, config);
+                    })
                     .then(function(response){
                         successfunc(response.data);
                     })
@@ -2100,11 +2117,26 @@ window.createVueInstance = function(element) {
                 button.innerHTML = '<i class=\'fas fa-spinner fa-spin\'></i>&nbsp;' + window.vue.loading_please_wait; 
 
                 if (form.checkValidity()) {
-                    form.submit();
+                    window.vue.submitForm(form, function() {
+                        button.innerHTML = origtext;
+                    });
                 } else {
                     form.reportValidity();
                     button.innerHTML = origtext;
                 }
+            },
+
+            submitForm: function(form, onError = function(){}) {
+                if (!formNeedsBufferedUpload(form)) {
+                    form.submit();
+                    return;
+                }
+
+                submitFormBuffered(form).catch(function(error) {
+                    console.error(error);
+                    onError();
+                    alert(error.message);
+                });
             },
 
             fixQuickScanPos: function(pwa = false) {
@@ -2189,4 +2221,20 @@ window.createVueInstance = function(element) {
 
 document.addEventListener('DOMContentLoaded', function() {
     window.vue = window.createVueInstance('#app');
+});
+
+//Forms with picked files that are submitted with a submit button are sent with a body built in memory, see upload.js
+document.addEventListener('submit', function(event) {
+    const form = event.target;
+
+    if ((event.defaultPrevented) || (!(form instanceof HTMLFormElement)) || (!formNeedsBufferedUpload(form))) {
+        return;
+    }
+
+    event.preventDefault();
+
+    submitFormBuffered(form).catch(function(error) {
+        console.error(error);
+        alert(error.message);
+    });
 });
